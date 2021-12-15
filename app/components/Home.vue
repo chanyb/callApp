@@ -25,12 +25,12 @@ export default {
     },
     methods: {
         vibrate: function() {
-            console.log("clicked1");
-            //android.content.Context.VIBRATOR_SERVICE
-            let vibrateService = Application.android.context.getSystemService(android.content.Context.VIBRATOR_SERVICE);
-            vibrateService.vibrate(2000);
-            // console.log(Object.keys(vibrateService));
-            console.log("clicked2");
+            if (Application.android) {
+                let vibrateService = Application.android.context.getSystemService(android.content.Context.VIBRATOR_SERVICE);
+                vibrateService.vibrate(2000);
+            } else if (Application.ios) {
+                
+            }
         },
     }
 };
