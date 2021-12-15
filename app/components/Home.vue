@@ -27,9 +27,9 @@ export default {
         vibrate: function() {
             if (Application.android) {
                 let vibrateService = Application.android.context.getSystemService(android.content.Context.VIBRATOR_SERVICE);
-                vibrateService.vibrate(2000);
+                vibrateService.vibrate(1000);
             } else if (Application.ios) {
-                
+                AudioServicesPlaySystemSoundWithCompletion(1352,null);
             }
         },
     }
