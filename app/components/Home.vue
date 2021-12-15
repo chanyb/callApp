@@ -28,8 +28,22 @@ export default {
             if (Application.android) {
                 let vibrateService = Application.android.context.getSystemService(android.content.Context.VIBRATOR_SERVICE);
                 vibrateService.vibrate(1000);
+
+                var path = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+
+                // let soundService = Application.android.context.getSystemService(android.content.Context.AUDIO_SERVICE);
+                let media = android.media;
+                let RingtoneManager = media.RingtoneManager;
+                let notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                let Rington = RingtoneManager.getRingtone(Application.android.context, notification);
+                Rington.play();
+
+                // for(var name in RingtoneManager) {
+                //     console.log(name);
+                // }
+                
             } else if (Application.ios) {
-                AudioServicesPlaySystemSoundWithCompletion(1352,null);
+                AudioServicesPlaySystemSoundWithCompletion(1352,null); //vibe
             }
         },
     }
