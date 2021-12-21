@@ -46,8 +46,6 @@ export default {
                 // AudioServicesPlaySystemSoundWithCompletion(1020,null); //sound
                 // var mainBundle = NSBundle.mainBundle
 
-                console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
-
                 if(!this.hasPermission()) {
                     await this.getPermission();
                     this.hasPermission() ? '' : alert("권한 설정을 거부하셨습니다. 기능 사용을 원하실 경우, 기기의 '설정' 앱으로 이동하여 callApp의 권한을 허용 해주세요.");
@@ -59,7 +57,6 @@ export default {
                 content.body = "body";
                 content.sound = UNNotificationSound.defaultSound;
 
-
                 const userInfoDict = NSMutableDictionary.alloc().initWithCapacity(4);
                 userInfoDict.setObjectForKey(1, 'id');
 			    userInfoDict.setObjectForKey('title_first', 'title');
@@ -67,18 +64,11 @@ export default {
                 userInfoDict.setObjectForKey('10', 'interval');
                 content.userInfo = userInfoDict;
 
-
                 let trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeIntervalRepeats(5, false);
                 let request = UNNotificationRequest.requestWithIdentifierContentTrigger("test_notification", content, trigger);
 
                 UNUserNotificationCenter.currentNotificationCenter().addNotificationRequestWithCompletionHandler(request, (error) => (error ? console.log(`Error scheduling notification: ${error.localizedDescription}`) : null));
-                // Create the request
-                // console.log(UUID());
-                // let uuidString = UUID().uuidString
-                // console.log(uuidString);
-
-                console.log(iOSApplication.addNotificationObserver('test_notification', alert("1234")));
-                console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
+                iOSApplication.addNotificationObserver('test_notification', alert("1234"))
             }
         },
         hasPermission: function() { // in iOS
