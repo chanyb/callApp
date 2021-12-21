@@ -16,7 +16,8 @@
 </template>
 
 <script>
-import { Application, iOSApplication } from '@nativescript/core';
+import { Application, iOSApplication, Color } from '@nativescript/core';
+import { LocalNotifications } from '@nativescript/local-notifications';
 export default {
     computed: {
         message() {
@@ -39,7 +40,8 @@ export default {
                 setInterval(function() {
                     Ringtone.stop();
                 }.bind(Ringtone),3000);
-
+                
+                this.notification();
                 
             } else if (Application.ios) {
                 AudioServicesPlaySystemSoundWithCompletion(1352,null); //vibe
@@ -87,7 +89,57 @@ export default {
             // iOS 10 이상 사용 가능 
             return !!UNUserNotificationCenter;
         },
-    }
+        notification: function() {
+            LocalNotifications.schedule([
+            {
+                id: 1, // generated id if not set
+                title: 'The title',
+                body: 'Recurs every minute until cancelled',
+                ticker: 'The ticker',
+                color: new Color('red'),
+                badge: 1,
+                // groupedMessages: ['The first', 'Second', 'Keep going', 'one more..', 'OK Stop'], //android only
+                // groupSummary: 'Summary of the grouped messages above', //android only
+                // ongoing: true, // makes the notification ongoing (Android only)
+                forceShowWhenInForeground: true,
+                priority: 2,
+                icon: 'res://heart',
+                image: 'https://cdn-images-1.medium.com/max/1200/1*c3cQvYJrVezv_Az0CoDcbA.jpeg',
+                thumbnail: true,
+                interval: 'minute',
+                channel: 'My Channel', // default: 'Channel'
+                sound: this.isAndroid ? 'customsound' : 'customsound.wav',
+                at: new Date(new Date().getTime() + 10 * 1000), // 10 seconds from now
+                actions: [
+                    {
+                        id: "yes",
+                        type: "button",
+                        title: "Yes (and launch app)",
+                        launch: true
+                    },
+                    {
+                        id: "no",
+                        type: "button",
+                        title: "No",
+                        launch: false
+                    }
+                ]
+            },
+            ]).then(
+                (scheduledIds) => {
+                    console.log('Notification id(s) scheduled: ' + JSON.stringify(scheduledIds));
+                },
+                (error) => {
+                    console.log('scheduling error: ' + error);
+                }
+            );
+        },
+    },
+    data() {
+        return {
+            isAndroid: Application.android,
+        }
+    },
 };
 </script>
 
