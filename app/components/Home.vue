@@ -16,8 +16,9 @@
 </template>
 
 <script>
-import { Application, iOSApplication, Color } from '@nativescript/core';
+import { Application, Color } from '@nativescript/core';
 import { LocalNotifications } from '@nativescript/local-notifications';
+import { SharedNotificationDelegate } from '@nativescript/shared-notification-delegate';
 export default {
     computed: {
         message() {
@@ -67,10 +68,10 @@ export default {
                 content.userInfo = userInfoDict;
 
                 let trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeIntervalRepeats(5, false);
-                let request = UNNotificationRequest.requestWithIdentifierContentTrigger("test_notification", content, trigger);
-
+                let request = UNNotificationRequest.requestWithIdentifierContentTrigger("test_notification1111", content, trigger);
+                
                 UNUserNotificationCenter.currentNotificationCenter().addNotificationRequestWithCompletionHandler(request, (error) => (error ? console.log(`Error scheduling notification: ${error.localizedDescription}`) : null));
-                iOSApplication.addNotificationObserver('test_notification', alert("1234"))
+                this.addObserver("test_notification");
             }
         },
         hasPermission: function() { // in iOS
@@ -134,7 +135,25 @@ export default {
                 }
             );
         },
+        addObserver: function(uniqueKey) {
+            SharedNotificationDelegate.addObserver({
+                delegateUniqueKey: uniqueKey, // ensures uniqueness, if not set or is null/undefined, allows multiple of the same
+                userNotificationCenterWillPresentNotificationWithCompletionHandler: (notificationCenter, notification, handler, stop, next) => {
+                    // is this notification something I should handle?
+                    if (notification.request.content.userInfo.valueForKey('id') === 1) {
+                        // do stuff
+                        // intercept it and show alert
+                        handler(UNNotificationPresentationOptions.Alert);
+                        SharedNotificationDelegate.removeObserverByUniqueKey(uniqueKey);
+                        return;
+                    }
+                    // not mine, next should handle
+                    next();
+                }
+            });
+        },
     },
+    
     data() {
         return {
             isAndroid: Application.android,
