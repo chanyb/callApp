@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "122281359880",
+    "project_id": "nsprj-eb79b",
+    "storage_bucket": "nsprj-eb79b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:122281359880:android:daaba758931f87e41e6fbd",
+        "android_client_info": {
+          "package_name": "org.nativescript.callApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "122281359880-050nivj8hl7raeg3nudevgbkeogrbrtg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATZ9M8cck5XWdFzFwMByAAYS2sHmGs1U0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "122281359880-050nivj8hl7raeg3nudevgbkeogrbrtg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

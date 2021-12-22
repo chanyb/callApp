@@ -19,6 +19,7 @@
 import { Application, Color } from '@nativescript/core';
 import { LocalNotifications } from '@nativescript/local-notifications';
 import { SharedNotificationDelegate } from '@nativescript/shared-notification-delegate';
+import { firebase } from '@nativescript/firebase';
 export default {
     computed: {
         message() {
@@ -152,12 +153,37 @@ export default {
                 }
             });
         },
+        initFirebase: function() {
+            firebase.init({
+                // Optionally pass in properties for database, authentication and cloud messaging,
+                // see their respective docs.
+                showNotificationsWhenInForeground: true,
+                onMessageReceivedCallback: function(message) {
+                    console.log("Title: " + message.title);
+                    console.log("Body: " + message.body);
+                    // if your server passed a custom property called 'foo', then do this:
+                    console.log("Value of 'foo': " + message.data.foo);
+                },
+                onPushTokenReceivedCallback: function(token) {
+                    console.log("Firebase push token: " + token);
+                },
+            }).then(
+                () => {
+                    console.log("firebase.init done");
+                },
+                error => {
+                    console.log(`firebase.init error: ${error}`);
+                }
+            );
+        },
     },
-    
     data() {
         return {
             isAndroid: Application.android,
         }
+    },
+    created() {
+        this.initFirebase();
     },
 };
 </script>
