@@ -169,12 +169,41 @@ export default {
                 },
             }).then(
                 () => {
-                    console.log("firebase.init done");
+                    console.log("firebase.init done333");
                 },
                 error => {
-                    console.log(`firebase.init error: ${error}`);
+                    console.log(`firebase.init error333: ${error}`);
                 }
             );
+        },
+        initFirebase_ios: function() {
+            firebase.init({
+                // Optionally pass in properties for database, authentication and cloud messaging,
+                // see their respective docs.
+            }).then(
+                () => {
+                    console.log("firebase.init 12ddone");
+                },
+                error => {
+                    console.log(`firebase.init 12doneerror: ${error}`);
+                }
+            );
+        },
+        requestUserPermission: async function() {
+            const authStatus = await firebase()
+                .messaging()
+                .requestPermission({
+                ios: {
+                    alert: true
+                }
+                })
+            const enabled =
+                authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+                authStatus === messaging.AuthorizationStatus.PROVISIONAL
+
+            if (enabled) {
+                console.log('Authorization status:', authStatus)
+            }
         },
     },
     data() {
@@ -183,7 +212,7 @@ export default {
         }
     },
     created() {
-        this.initFirebase();
+        this.initFirebase_ios();
     },
 };
 </script>
