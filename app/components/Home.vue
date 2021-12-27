@@ -5,7 +5,7 @@
         </ActionBar>
 
         <GridLayout>
-            <Label class="info" @tap="vibrate()">
+            <Label class="info" @tap="isAndroid ? broadcastReceiver_example() : ''">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
@@ -27,6 +27,17 @@ export default {
         }
     },
     methods: {
+        broadcastReceiver_example: function() {
+            let alarmService = Application.android.context.getSystemService(android.content.Context.ALARM_SERVICE);
+            let broadcastReceiver = android.content.BroadcastReceiver;
+            // var intent = new android.content.Intent(android.content.Intent.ACTION_VIEW)
+            var intentFilter = new android.content.IntentFilter;
+            intentFilter.addAction(android.content.Intent.ACTION_LOCALE_CHANGED);
+            Application.android.registerBroadcastReceiver(intentFilter, function(context, intent) {
+                console.log("언어 설정을 변경했습니다.");
+                Application.android.unregisterBroadcastReceiver(intentFilter);
+            });
+        },
         vibrate: async function() {
             if (Application.android) {
                 let vibrateService = Application.android.context.getSystemService(android.content.Context.VIBRATOR_SERVICE);
@@ -224,7 +235,7 @@ export default {
         }
     },
     created() {
-        this.initFirebase_ios();
+        Application.ios ? this.initFirebase_ios() : this.initFirebase();
     },
 };
 </script>
