@@ -5,7 +5,7 @@
         </ActionBar>
 
         <GridLayout>
-            <Label class="info" @tap="isAndroid ? broadcastReceiver_example() : ''">
+            <Label class="info" @tap="isAndroid ? vibrate() : vibrate()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
@@ -35,6 +35,7 @@ export default {
             intentFilter.addAction(android.content.Intent.ACTION_LOCALE_CHANGED);
             Application.android.registerBroadcastReceiver(intentFilter, function(context, intent) {
                 console.log("언어 설정을 변경했습니다.");
+
                 Application.android.unregisterBroadcastReceiver(intentFilter);
             });
         },
@@ -48,12 +49,11 @@ export default {
                 let RingtoneManager = media.RingtoneManager;
                 let notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
                 let Ringtone = RingtoneManager.getRingtone(Application.android.context, notification);
-                Ringtone.play();
+                // Ringtone.play();
 
-                setInterval(function() {
-                    Ringtone.stop();
-                }.bind(Ringtone),3000);
-                
+                // setInterval(function() {
+                //     Ringtone.stop();
+                // }.bind(Ringtone),3000);
                 this.notification();
                 
             } else if (Application.ios) {
@@ -103,26 +103,23 @@ export default {
             return !!UNUserNotificationCenter;
         },
         notification: function() {
+            LocalNotifications.cancelAll();
             LocalNotifications.schedule([
             {
-                id: 1, // generated id if not set
-                title: 'The title',
-                body: 'Recurs every minute until cancelled',
-                ticker: 'The ticker',
-                color: new Color('red'),
+                id: 150, // generated id if not set
+                title: '채혈 대기',
+                body: '앞으로 나와주세요',
                 badge: 1,
                 // groupedMessages: ['The first', 'Second', 'Keep going', 'one more..', 'OK Stop'], //android only
                 // groupSummary: 'Summary of the grouped messages above', //android only
                 // ongoing: true, // makes the notification ongoing (Android only)
                 forceShowWhenInForeground: true,
-                priority: 2,
-                icon: 'res://heart',
-                image: 'https://cdn-images-1.medium.com/max/1200/1*c3cQvYJrVezv_Az0CoDcbA.jpeg',
+                priority: 0,
                 thumbnail: true,
-                interval: 'minute',
-                channel: 'My Channel', // default: 'Channel'
+                interval: 500,
+                channel: 'callApp', // default: 'Channel'
                 sound: this.isAndroid ? 'customsound' : 'customsound.wav',
-                at: new Date(new Date().getTime() + 10 * 1000), // 10 seconds from now
+                at: new Date(new Date().getTime() + 5 * 1000), // 10 seconds from now
                 actions: [
                     {
                         id: "yes",
