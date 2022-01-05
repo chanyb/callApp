@@ -5,7 +5,7 @@
         </ActionBar>
 
         <GridLayout>
-            <Label class="info" @tap="isAndroid ? vibrate() : vibrate()">
+            <Label class="info" @tap="isAndroid ? notification_android() : vibrate()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
@@ -39,52 +39,26 @@ export default {
                 Application.android.unregisterBroadcastReceiver(intentFilter);
             });
         },
-        vibrate: async function() {
-            if (Application.android) {
-                let vibrateService = Application.android.context.getSystemService(android.content.Context.VIBRATOR_SERVICE);
-                vibrateService.vibrate(1000);
+        sound_android: function() {
+            let media = android.media;
+            let RingtoneManager = media.RingtoneManager;
+            let notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            let Ringtone = RingtoneManager.getRingtone(Application.android.context, notification);
+            Ringtone.play();
 
-                // let soundService = Application.android.context.getSystemService(android.content.Context.AUDIO_SERVICE);
-                let media = android.media;
-                let RingtoneManager = media.RingtoneManager;
-                let notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-                let Ringtone = RingtoneManager.getRingtone(Application.android.context, notification);
-                // Ringtone.play();
-
-                // setInterval(function() {
-                //     Ringtone.stop();
-                // }.bind(Ringtone),3000);
-                this.notification();
-                
-            } else if (Application.ios) {
-                AudioServicesPlaySystemSoundWithCompletion(1352,null); //vibe
-                // AudioServicesPlaySystemSoundWithCompletion(1020,null); //sound
-                // var mainBundle = NSBundle.mainBundle
-
-                if(!this.hasPermission()) {
-                    await this.getPermission();
-                    this.hasPermission() ? '' : alert("권한 설정을 거부하셨습니다. 기능 사용을 원하실 경우, 기기의 '설정' 앱으로 이동하여 callApp의 권한을 허용 해주세요.");
-                }
-                
-                // UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptionsCompletionHandler
-                let content = UNMutableNotificationContent.new();
-                content.title = "title";
-                content.body = "body";
-                content.sound = UNNotificationSound.defaultSound;
-
-                const userInfoDict = NSMutableDictionary.alloc().initWithCapacity(4);
-                userInfoDict.setObjectForKey(1, 'id');
-			    userInfoDict.setObjectForKey('title_first', 'title');
-			    userInfoDict.setObjectForKey('body_first', 'body');
-                userInfoDict.setObjectForKey('10', 'interval');
-                content.userInfo = userInfoDict;
-
-                let trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeIntervalRepeats(5, false);
-                let request = UNNotificationRequest.requestWithIdentifierContentTrigger("test_notification1111", content, trigger);
-                
-                UNUserNotificationCenter.currentNotificationCenter().addNotificationRequestWithCompletionHandler(request, (error) => (error ? console.log(`Error scheduling notification: ${error.localizedDescription}`) : null));
-                this.addObserver("test_notification");
-            }
+            setInterval(function() {
+                Ringtone.stop();
+            }.bind(Ringtone),3000);
+        },
+        sound_ios: function() {
+            AudioServicesPlaySystemSoundWithCompletion(1020,null); //sound
+        },
+        vibrate_android: function() {
+            let vibrateService = Application.android.context.getSystemService(android.content.Context.VIBRATOR_SERVICE);
+            vibrateService.vibrate(1000);
+        },
+        vibrate_ios: function() {
+            AudioServicesPlaySystemSoundWithCompletion(1352,null); //vibe
         },
         hasPermission: function() { // in iOS
             if(Application.android) return ;
@@ -102,7 +76,7 @@ export default {
             // iOS 10 이상 사용 가능 
             return !!UNUserNotificationCenter;
         },
-        notification: function() {
+        notification_android: function() {
             LocalNotifications.cancelAll();
             LocalNotifications.schedule([
             {
@@ -116,7 +90,7 @@ export default {
                 forceShowWhenInForeground: true,
                 priority: 0,
                 thumbnail: true,
-                interval: 500,
+                interval: 'minute',
                 channel: 'callApp', // default: 'Channel'
                 sound: this.isAndroid ? 'customsound' : 'customsound.wav',
                 at: new Date(new Date().getTime() + 5 * 1000), // 10 seconds from now
@@ -144,6 +118,31 @@ export default {
                 }
             );
         },
+        notification_ios: async function() {
+            if(!this.hasPermission()) {
+                await this.getPermission();
+                this.hasPermission() ? '' : alert("권한 설정을 거부하셨습니다. 기능 사용을 원하실 경우, 기기의 '설정' 앱으로 이동하여 callApp의 권한을 허용 해주세요.");
+            }
+            
+            // UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptionsCompletionHandler
+            let content = UNMutableNotificationContent.new();
+            content.title = "title";
+            content.body = "body";
+            content.sound = UNNotificationSound.defaultSound;
+
+            const userInfoDict = NSMutableDictionary.alloc().initWithCapacity(4);
+            userInfoDict.setObjectForKey(1, 'id');
+            userInfoDict.setObjectForKey('title_first', 'title');
+            userInfoDict.setObjectForKey('body_first', 'body');
+            userInfoDict.setObjectForKey('10', 'interval');
+            content.userInfo = userInfoDict;
+
+            let trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeIntervalRepeats(5, false);
+            let request = UNNotificationRequest.requestWithIdentifierContentTrigger("test_notification1111", content, trigger);
+            
+            UNUserNotificationCenter.currentNotificationCenter().addNotificationRequestWithCompletionHandler(request, (error) => (error ? console.log(`Error scheduling notification: ${error.localizedDescription}`) : null));
+            this.addObserver("test_notification");
+        },
         addObserver: function(uniqueKey) {
             SharedNotificationDelegate.addObserver({
                 delegateUniqueKey: uniqueKey, // ensures uniqueness, if not set or is null/undefined, allows multiple of the same
@@ -154,7 +153,7 @@ export default {
                         // intercept it and show alert
                         handler(UNNotificationPresentationOptions.Alert);
                         SharedNotificationDelegate.removeObserverByUniqueKey(uniqueKey);
-                        return;
+                        stop();
                     }
                     // not mine, next should handle
                     next();
