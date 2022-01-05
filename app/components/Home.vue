@@ -5,7 +5,7 @@
         </ActionBar>
 
         <GridLayout>
-            <Label class="info" @tap="isAndroid ? notification_android() : vibrate()">
+            <Label class="info" @tap="isAndroid ? test() : vibrate_ios()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
@@ -16,10 +16,11 @@
 </template>
 
 <script>
-import { Application, Color } from '@nativescript/core';
+import { Application, Color, Utils } from '@nativescript/core';
 import { LocalNotifications } from '@nativescript/local-notifications';
 import { SharedNotificationDelegate } from '@nativescript/shared-notification-delegate';
 import { firebase } from '@nativescript/firebase';
+import { Human } from '../common';
 export default {
     computed: {
         message() {
@@ -27,8 +28,11 @@ export default {
         }
     },
     methods: {
+        test: function() {
+            //var notificationManager = NotificationManagerCompat.from(Utils.android.getApplicationContext());
+            for(var name in com.google) console.log(name);
+        },
         broadcastReceiver_example: function() {
-            let alarmService = Application.android.context.getSystemService(android.content.Context.ALARM_SERVICE);
             let broadcastReceiver = android.content.BroadcastReceiver;
             // var intent = new android.content.Intent(android.content.Intent.ACTION_VIEW)
             var intentFilter = new android.content.IntentFilter;
@@ -123,25 +127,27 @@ export default {
                 await this.getPermission();
                 this.hasPermission() ? '' : alert("권한 설정을 거부하셨습니다. 기능 사용을 원하실 경우, 기기의 '설정' 앱으로 이동하여 callApp의 권한을 허용 해주세요.");
             }
+
+            var date = new NSDateComponents();
+            date.second = 59;
+            this.sendNotification_ios('id', date);
             
-            // UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptionsCompletionHandler
-            let content = UNMutableNotificationContent.new();
-            content.title = "title";
-            content.body = "body";
+        },
+        sendNotification_ios: function(id, date) {
+            var content = UNMutableNotificationContent.new();
+            content.title = "채혈 대기 안내";
+            content.body = "채혈 1분전입니다. 준비해주세요.";
             content.sound = UNNotificationSound.defaultSound;
 
-            const userInfoDict = NSMutableDictionary.alloc().initWithCapacity(4);
-            userInfoDict.setObjectForKey(1, 'id');
-            userInfoDict.setObjectForKey('title_first', 'title');
-            userInfoDict.setObjectForKey('body_first', 'body');
-            userInfoDict.setObjectForKey('10', 'interval');
+            var userInfoDict = NSMutableDictionary.alloc().initWithCapacity(4);
+            userInfoDict.setObjectForKey('test_notification'+id, 'id');
             content.userInfo = userInfoDict;
 
-            let trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeIntervalRepeats(5, false);
-            let request = UNNotificationRequest.requestWithIdentifierContentTrigger("test_notification1111", content, trigger);
-            
+            // var trigger = UNTimeIntervalNotificationTrigger.triggerWithTimeIntervalRepeats(5,false);
+            var trigger = UNCalendarNotificationTrigger.triggerWithDateMatchingComponentsRepeats(date, true);
+            var request = UNNotificationRequest.requestWithIdentifierContentTrigger("test_notification"+id, content, trigger);
             UNUserNotificationCenter.currentNotificationCenter().addNotificationRequestWithCompletionHandler(request, (error) => (error ? console.log(`Error scheduling notification: ${error.localizedDescription}`) : null));
-            this.addObserver("test_notification");
+            this.addObserver("test_notification"+id);
         },
         addObserver: function(uniqueKey) {
             SharedNotificationDelegate.addObserver({
@@ -156,6 +162,25 @@ export default {
                         stop();
                     }
                     // not mine, next should handle
+                    next();
+                },
+                userNotificationCenterDidReceiveNotificationResponseWithCompletionHandler: (notificationCenter, notification, handler, stop, next) => {
+                    console.log('this is in the DidReceiveNotification33');
+                    if (notification.notification.request.content.userInfo.valueForKey('id') === uniqueKey) {
+                        // do stuff
+                        // intercept it and show alert
+                        handler(UNNotificationPresentationOptions.Alert);
+                        LocalNotifications.cancelAll();
+                        SharedNotificationDelegate.removeObserverByUniqueKey(uniqueKey);
+                        LocalNotifications.cancel(uniqueKey /* the ID */).then(foundAndCanceled => {
+                            if (foundAndCanceled) {
+                                console.log("OK, it's gone!")
+                            } else {
+                                console.log('No that id was scheduled')
+                            }
+                        });
+                        stop();
+                    }
                     next();
                 }
             });
