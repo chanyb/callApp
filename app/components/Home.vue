@@ -288,13 +288,31 @@ export default {
 
         },
         motion_android: function() {
-            let activityManager = Application.android.context.getSystemService(android.content.Context.ACTIVITY_SERVICE);
+            let sensorManager = Application.android.context.getSystemService(android.content.Context.SENSOR_SERVICE);
             this.getPermission_android();
-            // console.log(androidx.core.app.ActivityCompat.checkSelfPermission(Application.android.context, android.Manifest.permission.ACTIVITY_SERVICE));
+
+            var TYPE_STEP_DETECTOR = 18;
+            var stepDetector = sensorManager.getDefaultSensor(TYPE_STEP_DETECTOR);
+            // console.log();
+
+            var sensorListener = new android.hardware.SensorEventListener({
+                onSensorChanged(event) {
+                    console.log(event);
+                },
+
+                onAccuracyChanged(sensor, accuracy) {
+                    // nothing..
+                },
+            })
 
 
-            
-
+            // 센서 속도 설정
+            // * 옵션
+            // - SENSOR_DELAY_NORMAL: 20,000 초 딜레이
+            // - SENSOR_DELAY_UI: 6,000 초 딜레이
+            // - SENSOR_DELAY_GAME: 20,000 초 딜레이
+            // - SENSOR_DELAY_FASTEST: 딜레이 없음
+            sensorManager.registerListener(sensorListener, stepDetector, android.hardware.SensorManager.SENSOR_DELAY_FASTEST)
         },
     },
     data() {
