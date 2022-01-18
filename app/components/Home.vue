@@ -5,7 +5,7 @@
         </ActionBar>
 
         <GridLayout>
-            <Label class="info" @tap="isAndroid ? test() : vibrate_ios()">
+            <Label class="info" @tap="isAndroid ? motion_android() : vibrate_ios()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
@@ -21,6 +21,7 @@ import { LocalNotifications } from '@nativescript/local-notifications';
 import { SharedNotificationDelegate } from '@nativescript/shared-notification-delegate';
 import { firebase } from '@nativescript/firebase';
 import { Human } from '../common';
+
 export default {
     computed: {
         message() {
@@ -75,6 +76,12 @@ export default {
             return new Promise((resolve, reject) => {
                 UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptionsCompletionHandler(UNAuthorizationOptions.Alert | UNAuthorizationOptions.Badge | UNAuthorizationOptions.Sound, (granted, error) => resolve(granted));
             });
+        },
+        hasPermission_android: function(val) {
+            return androidx.core.app.ActivityCompat.checkSelfPermission(Application.android.context, val);
+        },
+        getPermission_android: function() {
+            androidx.core.app.ActivityCompat.requestPermissions(Application.android.foregroundActivity, [android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACTIVITY_RECOGNITION], 0);
         },
         isUNUserNotificationCenterAvailable: function() {
             // iOS 10 이상 사용 가능 
@@ -249,6 +256,46 @@ export default {
                 console.log('Authorization status:', authStatus)
             }
         },
+        location_android: function() {
+            let locationManager = Application.android.context.getSystemService(android.content.Context.LOCATION_SERVICE);
+
+            /* getLastKnownLocation 사용 
+            var currentLocation = locationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
+            var latitude = currentLocation.getLatitude();
+            var longitude = currentLocation.getLongitude();
+            alert("lat: "+latitude+"\nlng: "+longitude);
+            */
+
+            /* LocationListener 사용 */
+            var gpsListener = new android.location.LocationListener({
+                onLocationChanged(location) {
+                    var latitude = location.getLatitude();
+                    var longitude = location.getLongitude();
+
+                    alert("lat: "+latitude+"\nlng: "+longitude);
+                }
+            });
+
+            if(locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+                // 위성 이용
+                // locationManager.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 1000, 1, gpsListener);
+            }
+
+            if(locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)) {
+                // 이동통신 기지국 또는 WiFi access point 이용
+                // locationManager.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 1000, 1, gpsListener);
+            }
+
+        },
+        motion_android: function() {
+            let activityManager = Application.android.context.getSystemService(android.content.Context.ACTIVITY_SERVICE);
+            this.getPermission_android();
+            // console.log(androidx.core.app.ActivityCompat.checkSelfPermission(Application.android.context, android.Manifest.permission.ACTIVITY_SERVICE));
+
+
+            
+
+        },
     },
     data() {
         return {
@@ -257,6 +304,7 @@ export default {
     },
     created() {
         Application.ios ? this.initFirebase_ios() : this.initFirebase();
+        
     },
 };
 </script>
