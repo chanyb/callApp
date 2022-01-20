@@ -5,7 +5,7 @@
         </ActionBar>
 
         <GridLayout>
-            <Label class="info" @tap="isAndroid ? motion_android() : vibrate_ios()">
+            <Label class="info" @tap="isAndroid ? motion_android() : motion_ios()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
@@ -65,13 +65,13 @@ export default {
         vibrate_ios: function() {
             AudioServicesPlaySystemSoundWithCompletion(1352,null); //vibe
         },
-        hasPermission: function() { // in iOS
+        hasPermission: function() { // in iOS notification
             if(Application.android) return ;
             const settings = UIApplication.sharedApplication.currentUserNotificationSettings;
             const types = UIUserNotificationType.Alert | UIUserNotificationType.Badge | UIUserNotificationType.Sound;
             return (settings.types & types) > 0;
         },
-        getPermission: function() { // in iOS
+        getPermission: function() { // in iOS notification
             if(Application.android) return ;
             return new Promise((resolve, reject) => {
                 UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptionsCompletionHandler(UNAuthorizationOptions.Alert | UNAuthorizationOptions.Badge | UNAuthorizationOptions.Sound, (granted, error) => resolve(granted));
@@ -295,7 +295,7 @@ export default {
             var stepDetector = sensorManager.getDefaultSensor(TYPE_STEP_DETECTOR);
             // console.log();
 
-            var sensorListener = new android.hardware.SensorEventListener({
+            let sensorListener = new android.hardware.SensorEventListener({
                 onSensorChanged(event) {
                     console.log(event);
                 },
@@ -313,6 +313,32 @@ export default {
             // - SENSOR_DELAY_GAME: 20,000 초 딜레이
             // - SENSOR_DELAY_FASTEST: 딜레이 없음
             sensorManager.registerListener(sensorListener, stepDetector, android.hardware.SensorManager.SENSOR_DELAY_FASTEST)
+        },
+        location_ios: function() {
+            let locationManager = new CLLocationManager();
+            
+            // 위치 정보 권한 요청
+            locationManager.requestWhenInUseAuthorization();
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+            locationManager.startMonitoringSignificantLocationChanges();
+
+            var latitude = locationManager.location.coordinate.latitude;
+            var longitude = locationManager.location.coordinate.longitude;
+            alert("lat: "+latitude+"\nlng: "+longitude);
+        },
+        motion_ios: function() {
+            let activityManager = new CMMotionActivityManager(); // 어떻게 쓰는 건지 좀 더 알아 봐야 함.. 
+            let pedoMeter = new CMPedometer();
+
+            pedoMeter.startPedometerUpdatesFromDateWithHandler(new Date(), (data, error) => {
+                if(error) {
+                    console.log(error);
+                }else {
+                    console.log(data.numberOfSteps);
+                    alert(data.numberOfSteps); // 안뜬다..
+                }
+            });
+
         },
     },
     data() {
