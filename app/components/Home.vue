@@ -4,14 +4,15 @@
             <Label text="Home"/>
         </ActionBar>
 
-        <GridLayout>
-            <Label class="info" @tap="isAndroid ? motion_android() : motion_ios()">
+        <StackLayout>
+            <!-- <Label class="info" @tap="isAndroid ? signaturePad() : motion_ios()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
                 </FormattedString>
-            </Label>
-        </GridLayout>
+            </Label> -->
+            <DrawingPad height="400" />
+        </StackLayout>
     </Page>
 </template>
 
