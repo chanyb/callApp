@@ -11,13 +11,14 @@
                     <Span :text="message" />
                 </FormattedString>
             </Label> -->
-            <DrawingPad height="400" />
+            <DrawingPad id="signaturePad" height="400" />
+            <Button @tap="test()" text="Button" />
         </StackLayout>
     </Page>
 </template>
 
 <script>
-import { Application, Color, Utils } from '@nativescript/core';
+import { Application, Color, Utils, Frame, ImageSource, knownFolders } from '@nativescript/core';
 import { LocalNotifications } from '@nativescript/local-notifications';
 import { SharedNotificationDelegate } from '@nativescript/shared-notification-delegate';
 import { firebase } from '@nativescript/firebase';
@@ -31,8 +32,21 @@ export default {
     },
     methods: {
         test: function() {
-            //var notificationManager = NotificationManagerCompat.from(Utils.android.getApplicationContext());
-            for(var name in com.google) console.log(name);
+            const pad = Frame.topmost().getViewById('signaturePad');
+            pad.getTransparentDrawing().then((res) => {
+                console.log(res);
+                const img = new ImageSource(res);
+                try{
+                    console.log("11");
+                    console.log(img.saveToFile(knownFolders.documents().path+'/appdata/'+'test', 'png', 100));
+                    console.log("22");
+                }catch(e) {
+                    console.log(e);
+                }
+                // const base64imageString = image.toBase64String('jpg');
+
+            });
+            alert("clicked");
         },
         broadcastReceiver_example: function() {
             let broadcastReceiver = android.content.BroadcastReceiver;
