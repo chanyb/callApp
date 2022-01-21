@@ -31,20 +31,19 @@ export default {
         }
     },
     methods: {
-        test: function() {
+        signature_android: function() {
             const pad = Frame.topmost().getViewById('signaturePad');
             pad.getTransparentDrawing().then((res) => {
-                console.log(res);
                 const img = new ImageSource(res);
-                try{
-                    console.log("11");
-                    console.log(img.saveToFile(knownFolders.documents().path+'/appdata/'+'test', 'png', 100));
-                    console.log("22");
-                }catch(e) {
-                    console.log(e);
-                }
-                // const base64imageString = image.toBase64String('jpg');
-
+                img.saveToFile(knownFolders.documents().path+'/appdata/'+'test', 'png', 100);
+            });
+            alert("clicked");
+        },
+        signature_ios: function() {
+            const pad = Frame.topmost().getViewById('signaturePad');
+            pad.getDrawing().then((res) => {
+                const img = new ImageSource(res);
+                img.saveToFile(knownFolders.documents().path+'/appdata/'+'test', 'png', 100);
             });
             alert("clicked");
         },
