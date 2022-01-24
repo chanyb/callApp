@@ -5,7 +5,7 @@
         </ActionBar>
 
         <StackLayout>
-            <Label class="info" @tap="isAndroid ? fingerPrint_android() : motion_ios()">
+            <Label class="info" @tap="isAndroid ? fingerPrint_android() : fingerPrint_ios()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
@@ -396,6 +396,47 @@ export default {
                     alert("시도 횟수가 너무 많습니다. 나중에 다시 시도하세요.");
                 }
             });
+        },
+        fingerPrint_ios: function() {
+            var biometricAuth = new BiometricAuth();
+            biometricAuth.available().then((avail) => {
+                if (!avail) {
+                    console.log("-------- NOT AVAIL ---------");
+                    return;
+                }
+
+                biometricAuth.didFingerprintDatabaseChange().then((changed) => {
+                    if (changed) {
+                        console.log('changed');
+                        // re-auth the user by asking for his credentials before allowing a fingerprint scan again
+                    } else {
+                        console.log('call!');
+                        // call the fingerprint scanner
+                    }
+                });
+            });
+            console.log("1111111111111");
+            biometricAuth.verifyBiometric({
+                title: 'Enter your password',
+                message: 'Scan yer finger', // optional
+                pinFallback: true, // do not allow pnFallback to enable crypto operations
+                keyName: 'MySecretKeyName', // The name of the key that will be created/used
+                secret: 'The Secret I want encrypted'
+            }).then((result) => {
+                console.log("33333333333333333333233");
+                console.log(result);
+                if (result.code === 0) {
+                    console.log("성공");
+                }else {
+                    console.log("CCAAAAAAATTTTTTCCCCCCHHHHH@@@@@@@@@@@@@@@@@!!!!!!!!!!!!");
+                }
+            })
+            .catch((err) => {
+                // failed 각각의 처리는 좀 필요할 수 있다.
+                console.log("failed");
+                this.set('status', `Biometric ID NOT OK: " + ${JSON.stringify(err)}`)
+            })
+
         },
     },
     data() {
