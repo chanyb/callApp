@@ -42,6 +42,7 @@ export default {
         signature_ios: function() {
             const pad = Frame.topmost().getViewById('signaturePad');
             pad.getDrawing().then((res) => {
+                knownFolders.documents().getFolder('appdata');
                 const img = new ImageSource(res);
                 img.saveToFile(knownFolders.documents().path+'/appdata/'+'test', 'png', 100);
             });
