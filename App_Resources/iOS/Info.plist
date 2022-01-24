@@ -55,5 +55,7 @@
     <string>내 위치 확인을 위해 권한이 필요합니다.</string>
     <key>NSMotionUsageDescription</key>
     <string>동작 감지를 위해 권한이 필요합니다.</string>
+	<key>NSFaceIDUsageDescription</key>
+    <string>생체인증을 사용하기 위해 권한이 필요합니다.</string>
 </dict>
 </plist>
