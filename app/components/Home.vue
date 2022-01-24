@@ -5,23 +5,32 @@
         </ActionBar>
 
         <StackLayout>
-            <!-- <Label class="info" @tap="isAndroid ? signaturePad() : motion_ios()">
+            <Label class="info" @tap="isAndroid ? fingerPrint_android() : motion_ios()">
                 <FormattedString>
                     <Span class="fas" text.decode="&#xf135; "/>
                     <Span :text="message" />
                 </FormattedString>
-            </Label> -->
-            <DrawingPad id="signaturePad" height="400" />
-            <Button @tap="test()" text="Button" />
+            </Label>
+
+            <!-- Signature pad -->
+            <!-- <DrawingPad id="signaturePad" height="400" />
+            <Button @tap="test()" text="Button" /> -->
         </StackLayout>
     </Page>
 </template>
 
 <script>
 import { Application, Color, Utils, Frame, ImageSource, knownFolders } from '@nativescript/core';
+
+// notification
 import { LocalNotifications } from '@nativescript/local-notifications';
 import { SharedNotificationDelegate } from '@nativescript/shared-notification-delegate';
+
+// firebase (push notification)
 import { firebase } from '@nativescript/firebase';
+
+// fingerprint
+import { BiometricAuth, BiometricIDAvailableResult } from "@nativescript/biometrics";
 import { Human } from '../common';
 
 export default {
@@ -354,6 +363,39 @@ export default {
                 }
             });
 
+        },
+        fingerPrint_android: function(message) {
+            message===null ? message='지문을 인식해주세요.' : message;
+            var biometricAuth = new BiometricAuth();
+
+            biometricAuth.available().then((avail) => {
+                // console.log(avail);
+            });
+
+            biometricAuth.verifyBiometric({
+                title: '본인 인증', // optional title (used only on Android)
+                message: message, // optional (used on both platforms) - for FaceID on iOS see the notes about NSFaceIDUsageDescription
+                fallbackMessage: '비밀번호 입력', // optional
+            })
+            .then((result) => {
+                console.log("111111");
+                if (result.code === 0) {
+                    console.log('Biometric ID OK');
+                }
+                else if (result.code === 40) {
+                    // 지문이 일치하지 않을 때, android가 자동으로 처리해 줌
+                }
+            }).catch((err) => {
+                console.log("6666666");
+                if (err.code === -3) {
+                    // Negative Button Pressed (지문으로 인증하지 않을 때)
+                    console.log("잡았습니다.");
+                } 
+                else if(err.code === 50 && err.message === "시도 횟수가 너무 많습니다. 나중에 다시 시도하세요.") {
+                    // 너무 많이 틀렸을 때
+                    alert("시도 횟수가 너무 많습니다. 나중에 다시 시도하세요.");
+                }
+            });
         },
     },
     data() {

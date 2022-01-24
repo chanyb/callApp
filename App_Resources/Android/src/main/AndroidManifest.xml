@@ -23,6 +23,9 @@
 	<!-- 동작 -->
 	<uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
+	<!-- 생체 인증 -->
+	<uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
 	<application
 		android:name="com.tns.NativeScriptApplication"
 		android:allowBackup="true"
